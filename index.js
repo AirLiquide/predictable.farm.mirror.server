@@ -6,8 +6,8 @@ var currentConnections = {};
 var clientConnected = {};
 
 function getFreePort(ports) {
-    for(var i = 30000; i <= 31000; i++) {
-        if(ports[i] === undefined) {
+    for (var i = 30000; i <= 31000; i++) {
+        if (ports[i] === undefined) {
             return i;
         }
     }
@@ -23,14 +23,12 @@ function unassignPort(port, ports) {
     return ports;
 }
 
-io.on('connection', function(client) {
-    console.log("CONNECTED");
-
-    client.on('get_port', function(name) {
+io.on('connection', function (client) {
+    client.on('get_port', function (name) {
         var port = getFreePort(ports);
         ports = assignPort(port, ports);
 
-        clientConnected[port] = name;
+        clientConnected[port] = {name: name, tunnel: false};
         currentConnections[client.id] = port;
 
         client.broadcast.emit('ssh_items_list', clientConnected);
@@ -38,18 +36,27 @@ io.on('connection', function(client) {
         io.to(client.id).emit('open_tunnel', port);
     });
 
-    client.on('get_connected_clients', function() {
+    client.on('get_connected_clients', function () {
         io.to(client.id).emit('ssh_items_list', clientConnected);
     });
 
-    client.on('disconnect', function() {
-        delete clientConnected[currentConnections[client.id]];
-        ports = unassignPort(currentConnections[client.id], ports);
-        client.broadcast.emit('ssh_items_list', clientConnected);
-        console.log('DISCONNECTED');
+    client.on('disconnect', function () {
+        if (currentConnections[client.id] !== undefined) {
+            delete clientConnected[currentConnections[client.id]];
+            ports = unassignPort(currentConnections[client.id], ports);
+            client.broadcast.emit('ssh_items_list', clientConnected);
+        }
+    });
+
+    client.on('tunnel_ok', function (name) {
+        for (var key in clientConnected) {
+            if (clientConnected[key].name === name) {
+                console.log("OK");
+                clientConnected[key].tunnel = true;
+                client.broadcast.emit('ssh_items_list', clientConnected);
+            }
+        }
     });
 });
 
-server.listen(3000, function () {
-    console.log('STARTED');
-});
+server.listen(3000);
