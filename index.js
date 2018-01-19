@@ -40,6 +40,15 @@ io.on('connection', function (client) {
         io.to(client.id).emit('ssh_items_list', clientConnected);
     });
 
+    client.on('reload_tunnel', function (port) {
+        port = parseInt(port);
+        for (var key in currentConnections) {
+            if (currentConnections[key] === port) {
+                io.to(key).emit('open_tunnel', port);
+            }
+        }
+    });
+
     client.on('disconnect', function () {
         if (currentConnections[client.id] !== undefined) {
             delete clientConnected[currentConnections[client.id]];
@@ -51,7 +60,6 @@ io.on('connection', function (client) {
     client.on('tunnel_ok', function (name) {
         for (var key in clientConnected) {
             if (clientConnected[key].name === name) {
-                console.log("OK");
                 clientConnected[key].tunnel = true;
                 client.broadcast.emit('ssh_items_list', clientConnected);
             }
