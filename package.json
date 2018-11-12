@@ -1,19 +1,11 @@
 {
-  "name": "predictable-mirror-server",
+  "name": "predictable.farm.mirror.server",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "dependencies": {
     "socket.io": "^2.0.4"
   },
-  "devDependencies": {},
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git@digital-git.airliquide.com:brivael.lepogam-sc/predictable-mirror-server.git"
-  },
-  "author": "",
-  "license": "ISC"
+  "author": "Air Liquide",
+  "license": "MIT"
 }
